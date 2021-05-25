@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'rest_framework_jwt',
 
     # local applications
+    'core',
+    'auth_'
 ]
 
 MIDDLEWARE = [
