@@ -1,9 +1,17 @@
+from datetime import timedelta
+
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from utils.constants import KINDS_OF_PET, KIND_OF_PET_CAT, LOT_STATUSES, LOT_STATUS_ACTIVE
+
+
+def default_end_time():
+    now = timezone.now()
+    start = now.replace(hour=13, minute=0, second=0, microsecond=0)
+    return start + timedelta(days=7)
 
 
 class Pet(models.Model):
@@ -34,7 +42,7 @@ class Lot(models.Model):
     status = models.SmallIntegerField(choices=LOT_STATUSES, default=LOT_STATUS_ACTIVE,
                                       verbose_name=_('Status of the lot'))
     start_date = models.DateTimeField(auto_now_add=True, verbose_name=_('Auction start date'))
-    end_date = models.DateTimeField(blank=True, null=True, verbose_name=_('Auction end date'))
+    end_date = models.DateTimeField(default=default_end_time, verbose_name=_('Auction end date'))
     owner = models.ForeignKey(User,
                               on_delete=models.CASCADE,
                               related_name='lots',
@@ -52,7 +60,7 @@ class Lot(models.Model):
 class Bid(models.Model):
     value = models.FloatField(verbose_name=_('Bid value'))
     placement_date = models.DateTimeField(auto_now_add=True, verbose_name=_('Bid placement date'))
-    is_won = models.BooleanField(default=False, verbose_name=_(''))
+    is_won = models.BooleanField(default=False, verbose_name=_('Is bid won?'))
     owner = models.ForeignKey(User,
                               on_delete=models.CASCADE,
                               related_name='bids',
