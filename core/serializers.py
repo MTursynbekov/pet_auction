@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from django.utils.translation import ugettext_lazy as _
 from core.models import Pet, Lot, Bid
-from utils.constants import LOT_STATUS_INACTIVE
+from utils.constants import LOT_STATUS_INACTIVE, LOT_STATUS_ACTIVE, LOT_STATUS_CLOSED
 
 
 class PetCreateSerializer(serializers.ModelSerializer):
@@ -26,8 +26,9 @@ class LotCreateSerializer(serializers.ModelSerializer):
         fields = ('pet_id', 'price', 'end_date')
 
     def validate(self, attr):
-        if attr['start_date'] >= attr['end_date']:
-            raise serializers.ValidationError(_("the end date of the lot can not be before the start date of the lot"))
+        lots = Lot.objects.filter(pet_id=attr['pet_id'], status=LOT_STATUS_ACTIVE)
+        if len(lots) > 0:
+            raise serializers.ValidationError(_("Lot with this pet is already exists"))
         return attr
 
 
@@ -56,6 +57,9 @@ class BidCreateSerializer(serializers.ModelSerializer):
 
         if lot.status == LOT_STATUS_INACTIVE:
             raise serializers.ValidationError(_('The lot is inactive'))
+
+        if lot.status == LOT_STATUS_CLOSED:
+            raise serializers.ValidationError(_('The lot is closed'))
 
         if lot.end_date > timezone.now():
             raise serializers.ValidationError(_('Lot closed'))
