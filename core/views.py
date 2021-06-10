@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from core.models import Pet, Lot, Bid
 from core.serializers import PetSerializer, PetCreateSerializer, LotSerializer, LotCreateSerializer, BidSerializer, \
     BidCreateSerializer
+from utils.constants import LOT_STATUS_ACTIVE, LOT_STATUS_CLOSED
 
 
 class PetsViewSet(viewsets.ModelViewSet):
@@ -30,7 +31,7 @@ class PetsViewSet(viewsets.ModelViewSet):
 
 
 class LotsViewSet(viewsets.ModelViewSet):
-    queryset = Lot.objects.all()
+    queryset = Lot.objects.filter(status=LOT_STATUS_ACTIVE)
     serializer_class = LotSerializer
     permission_classes = [IsAuthenticated]
 
@@ -38,7 +39,7 @@ class LotsViewSet(viewsets.ModelViewSet):
         if self.request.user.is_staff:
             return self.queryset
         else:
-            return Lot.objects.filter(owner=self.request.user)
+            return Lot.objects.filter(owner=self.request.user, status=LOT_STATUS_ACTIVE)
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -52,6 +53,12 @@ class LotsViewSet(viewsets.ModelViewSet):
     def get_lot_bids(self, request, pk):
         lot_bids = Bid.objects.filter(lot_id=pk)
         serializer = BidSerializer(lot_bids, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['GET'], detail=False, url_path='closed')
+    def get_closed_lots(self, request):
+        closed_lots = Lot.objects.filter(status=LOT_STATUS_CLOSED)
+        serializer = LotSerializer(closed_lots, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
