@@ -19,7 +19,6 @@ environ.Env.read_env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -30,7 +29,6 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -45,6 +43,7 @@ INSTALLED_APPS = [
     # 3-party applications
     'rest_framework',
     'rest_framework_jwt',
+    'django_celery_beat',
 
     # local applications
     'core',
@@ -81,7 +80,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'pet_auction.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
@@ -95,7 +93,6 @@ DATABASES = {
         'PORT': env('DB_PORT')
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -114,7 +111,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
@@ -149,3 +145,8 @@ JWT_AUTH = {
 
 STATIC_URL = '/static/'
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+# Celery Configuration Options
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
